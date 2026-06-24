@@ -4,7 +4,7 @@ import torch.nn as nn
 import torch.optim as optim
 from torch.utils.data import DataLoader
 from src.datasets import SuperResolutionDataset
-from src.models.super_resolution import PlaceholderSRModel
+from src.models.super_resolution import ESPCN
 
 def train_one_epoch(model, dataloader, criterion, optimizer, device):
     """
@@ -47,7 +47,7 @@ def main():
     dataloader = DataLoader(dataset, batch_size=batch_size, shuffle=True)
     
     # Model, Loss, Optimizer
-    model = PlaceholderSRModel().to(device)
+    model = ESPCN(upscale_factor=2, in_channels=1, out_channels=1).to(device)
     criterion = nn.L1Loss()
     optimizer = optim.Adam(model.parameters(), lr=learning_rate)
     
@@ -58,7 +58,7 @@ def main():
         
     # Save checkpoint
     os.makedirs('weights', exist_ok=True)
-    checkpoint_path = os.path.join('weights', 'sr_placeholder.pth')
+    checkpoint_path = os.path.join('weights', 'espcn.pth')
     torch.save(model.state_dict(), checkpoint_path)
     print(f"Saved weights to {checkpoint_path}")
 

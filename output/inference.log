@@ -1,0 +1,5 @@
+2026-06-24 06:03:25,128 - inference - INFO - Running inference for product: mock_product
+2026-06-24 06:03:25,626 - inference - INFO - Super-Resolved TIFF saved to: output\model_outputs\tir_superresolved_100m\mock_product.tif
+2026-06-24 06:03:25,626 - inference - INFO - Colorized TIFF saved to: output\model_outputs\colorized_tir_100m\mock_product.tif
+2026-06-24 06:04:26,921 - inference - INFO - Running inference for product: demo_product
+2026-06-24 06:04:26,922 - inference - ERROR - Could not find band B10 image under input/demo_product

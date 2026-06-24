@@ -5,8 +5,8 @@ import torch
 import tifffile
 from utils.file_utils import find_file
 from utils.logging_utils import setup_logging
-from src.models.super_resolution import PlaceholderSRModel
-from src.models.colorization import PlaceholderColorModel
+from src.models.super_resolution import ESPCN
+from src.models.colorization import UNet
 
 def run_inference(product_id, input_dir, output_dir, sr_model, color_model, device):
     """
@@ -84,13 +84,14 @@ def main():
     parser.add_argument('--output_dir', type=str, default='output', help='Output base directory.')
     parser.add_argument('--sr_weights', type=str, default=None, help='Path to SR model weights.')
     parser.add_argument('--color_weights', type=str, default=None, help='Path to colorization model weights.')
+    parser.add_argument('--color_base_channels', type=int, default=32, help='Base channels for colorization U-Net.')
     
     args = parser.parse_args()
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     
     # Load Models
-    sr_model = PlaceholderSRModel().to(device)
-    color_model = PlaceholderColorModel().to(device)
+    sr_model = ESPCN(upscale_factor=2, in_channels=1, out_channels=1).to(device)
+    color_model = UNet(in_channels=1, out_channels=3, base_channels=args.color_base_channels).to(device)
     
     if args.sr_weights and os.path.exists(args.sr_weights):
         sr_model.load_state_dict(torch.load(args.sr_weights, map_location=device))
