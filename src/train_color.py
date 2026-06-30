@@ -17,9 +17,13 @@ def train_one_epoch(model, dataloader, criterion, optimizer, device):
         tir_100m = batch['tir_100m'].to(device)
         rgb_100m = batch['rgb_100m'].to(device)
         
+        # Normalize inputs and targets to [0, 1]
+        tir_100m_norm = (tir_100m - 22459.0) / (26593.0 - 22459.0)
+        rgb_100m_norm = (rgb_100m - 7789.0) / (14254.0 - 7789.0)
+        
         optimizer.zero_grad()
-        outputs = model(tir_100m)
-        loss = criterion(outputs, rgb_100m)
+        outputs = model(tir_100m_norm)
+        loss = criterion(outputs, rgb_100m_norm)
         loss.backward()
         optimizer.step()
         
@@ -34,7 +38,7 @@ def main():
     parser = argparse.ArgumentParser(description='Train U-Net Colorization Model')
     parser.add_argument('--patches_dir', type=str, default=os.path.join('output', 'patches'),
                         help='Path to output/patches/ containing product sample directories.')
-    parser.add_argument('--epochs', type=int, default=1, help='Number of training epochs.')
+    parser.add_argument('--epochs', type=int, default=200, help='Number of training epochs.')
     parser.add_argument('--batch_size', type=int, default=4, help='Batch size for training.')
     parser.add_argument('--lr', type=float, default=1e-3, help='Learning rate.')
     parser.add_argument('--base_channels', type=int, default=32, help='Base channels for U-Net architecture.')
@@ -75,7 +79,8 @@ def main():
     # Simple training loop
     for epoch in range(args.epochs):
         loss = train_one_epoch(model, dataloader, criterion, optimizer, device)
-        print(f"Epoch {epoch+1}/{args.epochs} - Loss: {loss:.6f}")
+        if (epoch + 1) % 10 == 0 or epoch == 0 or epoch == args.epochs - 1:
+            print(f"Epoch {epoch+1}/{args.epochs} - Loss: {loss:.6f}")
         
     # Save checkpoint
     os.makedirs(args.weights_dir, exist_ok=True)

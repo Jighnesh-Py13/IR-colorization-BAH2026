@@ -58,7 +58,7 @@ class ESPCN(nn.Module):
         # Tensor shape flow: (B, 4, 256, 256) -> (B, 1, 512, 512)
         x = self.pixel_shuffle(x)
         
-        return x
+        return torch.sigmoid(x)
 
 # Alias for backward compatibility with existing training and inference scripts
 PlaceholderSRModel = ESPCN

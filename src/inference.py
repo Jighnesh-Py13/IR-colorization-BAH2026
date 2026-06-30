@@ -35,15 +35,20 @@ def run_inference(product_id, input_dir, output_dir, sr_model, color_model, devi
     elif img_tensor.ndim == 3:
         img_tensor = img_tensor.unsqueeze(0)              # (1, C, H, W)
         
-    # 2. Run Super-Resolution
+    # 2. Run Super-Resolution with normalized input
     sr_model.eval()
     with torch.no_grad():
-        sr_out_tensor = sr_model(img_tensor)
+        img_tensor_norm = torch.clamp((img_tensor - 22474.0) / (26186.0 - 22474.0), 0.0, 1.0)
+        sr_out_tensor_norm = sr_model(img_tensor_norm)
+        sr_out_tensor_norm = torch.clamp(sr_out_tensor_norm, 0.0, 1.0)
+        sr_out_tensor = sr_out_tensor_norm * (26593.0 - 22459.0) + 22459.0
         
-    # 3. Run Colorization
+    # 3. Run Colorization with normalized SR output
     color_model.eval()
     with torch.no_grad():
-        color_out_tensor = color_model(sr_out_tensor)
+        color_out_tensor_norm = color_model(sr_out_tensor_norm)
+        color_out_tensor_norm = torch.clamp(color_out_tensor_norm, 0.0, 1.0)
+        color_out_tensor = color_out_tensor_norm * (14254.0 - 7789.0) + 7789.0
         
     # Convert tensors back to numpy arrays
     sr_out = sr_out_tensor.squeeze().cpu().numpy()
